@@ -57,7 +57,7 @@ aptly_upload \
 -loglevel=DEBUG \
 -url=https://www.benjamin-borbe.de/aptly \
 -username=api \
--password=$HOME/aptly_api_postgres_backup_cron \
+-password=$HOME/aptly_api_password \
 -file=$DEB \
 -repo=unstable || exit 1
 
