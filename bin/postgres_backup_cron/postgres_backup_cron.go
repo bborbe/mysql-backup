@@ -86,7 +86,7 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 		return fmt.Errorf("parameter %s missing", PARAMETER_TARGET_DIR)
 	}
 
-	logger.Debugf("host %s, port %s, user %s, pass %s, database %s, targetDir %s, wait %v, oneTime %v, lockName %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
+	logger.Debugf("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
 
 	for {
 		logger.Debugf("backup started")
