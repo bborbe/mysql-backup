@@ -4,6 +4,38 @@
 
 `go get github.com/bborbe/postgres_backup_cron/bin/postgres_backup_cron`
 
+## Run Backup
+
+One time
+
+```
+postgres_backup_cron \
+-loglevel=debug \ 
+-host=localhost \
+-port=5432 \
+-lock=/tmp/lock \ 
+-username=postgres \
+-password=S3CR3T \
+-database=db \
+-targetdir=/backup \
+-one-time
+```
+
+Cron
+
+```
+postgres_backup_cron \
+-loglevel=debug \ 
+-host=localhost \
+-port=5432 \
+-lock=/tmp/lock \ 
+-username=postgres \
+-password=S3CR3T \
+-database=db \
+-targetdir=/backup \
+-wait=1h
+```
+
 ## Continuous integration
 
 [Jenkins](https://www.benjamin-borbe.de/jenkins/job/Go-Postgres-Backup-Cron/)

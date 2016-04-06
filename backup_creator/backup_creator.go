@@ -32,7 +32,7 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 		return nil
 	}
 	logger.Debugf("pg_dump started")
-	_, err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", "host", "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database})
+	_, err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database})
 	if err != nil {
 		return err
 	}
@@ -45,6 +45,7 @@ func buildBackupfileName(targetDirectory string, database string, date time.Time
 }
 
 func runCommand(command, cwd string, args []string) ([]byte, error) {
+	logger.Debugf("%s %s", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
 	if cwd != "" {
 		cmd.Dir = cwd

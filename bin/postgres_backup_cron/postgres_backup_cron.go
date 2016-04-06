@@ -20,11 +20,12 @@ const (
 	PARAMETER_POSTGRES_HOST     = "host"
 	PARAMETER_POSTGRES_PORT     = "port"
 	PARAMETER_POSTGRES_DATABASE = "database"
-	PARAMETER_POSTGRES_USER     = "user"
+	PARAMETER_POSTGRES_USER     = "username"
 	PARAMETER_POSTGRES_PASSWORD = "password"
 	PARAMETER_TARGET_DIR        = "targetdir"
 	PARAMETER_WAIT              = "wait"
 	PARAMETER_ONE_TIME          = "one-time"
+	PARAMETER_LOCK              = "lock"
 )
 
 type CreateBackup func(host string, port int, user string, pass string, database string, targetDir string) error
@@ -35,11 +36,12 @@ func main() {
 	hostPtr := flag.String(PARAMETER_POSTGRES_HOST, "", "host")
 	portPtr := flag.Int(PARAMETER_POSTGRES_PORT, 5432, "port")
 	databasePtr := flag.String(PARAMETER_POSTGRES_DATABASE, "", "database")
-	userPtr := flag.String(PARAMETER_POSTGRES_USER, "", "user")
+	userPtr := flag.String(PARAMETER_POSTGRES_USER, "", "username")
 	passwordPtr := flag.String(PARAMETER_POSTGRES_PASSWORD, "", "password")
 	waitPtr := flag.Duration(PARAMETER_WAIT, time.Minute*60, "wait")
 	oneTimePtr := flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 	targetDirPtr := flag.String(PARAMETER_TARGET_DIR, "", "target directory")
+	lockPtr := flag.String(PARAMETER_LOCK, LOCK_NAME, "lock")
 
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
@@ -48,7 +50,7 @@ func main() {
 	backupCreator := backup_creator.New()
 
 	writer := os.Stdout
-	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *targetDirPtr, *waitPtr, *oneTimePtr, LOCK_NAME)
+	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *targetDirPtr, *waitPtr, *oneTimePtr, *lockPtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -95,7 +97,7 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 			return nil
 		}
 
-		logger.Debugf("wait %d", wait)
+		logger.Debugf("wait %v", wait)
 		time.Sleep(wait)
 		logger.Debugf("done")
 	}
