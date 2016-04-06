@@ -2,7 +2,7 @@
 
 SOURCEDIRECTORY="github.com/bborbe/postgres_backup_cron"
 VERSION="1.0.1-b${BUILD_NUMBER}"
-NAME="postgres_backup_cron"
+NAME="postgres-backup-cron"
 
 ################################################################################
 
