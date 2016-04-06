@@ -12,9 +12,9 @@ import (
 
 func TestDoFail(t *testing.T) {
 	writer := bytes.NewBufferString("")
-	err := do(writer, func(host string, port int, user string, pass string, database string) error {
+	err := do(writer, func(host string, port int, user string, pass string, database string, targetDir string) error {
 		return nil
-	}, "", 0, "", "", "", time.Minute, false)
+	}, "", 0, "", "", "", "", time.Minute, false)
 	if err = AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
@@ -22,9 +22,9 @@ func TestDoFail(t *testing.T) {
 
 func TestDoSuccess(t *testing.T) {
 	writer := bytes.NewBufferString("")
-	err := do(writer, func(host string, port int, user string, pass string, database string) error {
+	err := do(writer, func(host string, port int, user string, pass string, database string, targetDir string) error {
 		return nil
-	}, "host", 5432, "user", "pass", "db", time.Minute, true)
+	}, "host", 5432, "user", "pass", "db", "/tmp", time.Minute, true)
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}

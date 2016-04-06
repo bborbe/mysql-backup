@@ -7,6 +7,7 @@ import (
 	"time"
 
 	flag "github.com/bborbe/flagenv"
+	"github.com/bborbe/lock"
 	"github.com/bborbe/log"
 	"github.com/bborbe/postgres_backup_cron/backup_creator"
 )
@@ -14,18 +15,19 @@ import (
 var logger = log.DefaultLogger
 
 const (
-	PARAMETER_LOGLEVEL = "loglevel"
-
+	LOCK_NAME                   = "/var/run/postgres_backup_cron.lock"
+	PARAMETER_LOGLEVEL          = "loglevel"
 	PARAMETER_POSTGRES_HOST     = "host"
 	PARAMETER_POSTGRES_PORT     = "port"
 	PARAMETER_POSTGRES_DATABASE = "database"
 	PARAMETER_POSTGRES_USER     = "user"
 	PARAMETER_POSTGRES_PASSWORD = "password"
+	PARAMETER_TARGET_DIR        = "targetdir"
 	PARAMETER_WAIT              = "wait"
 	PARAMETER_ONE_TIME          = "one-time"
 )
 
-type CreateBackup func(host string, port int, user string, pass string, database string) error
+type CreateBackup func(host string, port int, user string, pass string, database string, targetDir string) error
 
 func main() {
 	defer logger.Close()
@@ -37,6 +39,7 @@ func main() {
 	passwordPtr := flag.String(PARAMETER_POSTGRES_PASSWORD, "", "password")
 	waitPtr := flag.Duration(PARAMETER_WAIT, time.Minute*60, "wait")
 	oneTimePtr := flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
+	targetDirPtr := flag.String(PARAMETER_TARGET_DIR, "", "target directory")
 
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
@@ -45,7 +48,7 @@ func main() {
 	backupCreator := backup_creator.New()
 
 	writer := os.Stdout
-	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *waitPtr, *oneTimePtr)
+	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *targetDirPtr, *waitPtr, *oneTimePtr, LOCK_NAME)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -53,7 +56,12 @@ func main() {
 	}
 }
 
-func do(writer io.Writer, createBackup CreateBackup, host string, port int, user string, pass string, database string, wait time.Duration, oneTime bool) error {
+func do(writer io.Writer, createBackup CreateBackup, host string, port int, user string, pass string, database string, targetDir string, wait time.Duration, oneTime bool, lockName string) error {
+	l := lock.NewLock(lockName)
+	if err := l.Lock(); err != nil {
+		return err
+	}
+	defer l.Unlock()
 	logger.Debug("start")
 	defer logger.Debug("done")
 
@@ -72,10 +80,13 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 	if len(database) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_DATABASE)
 	}
+	if len(targetDir) == 0 {
+		return fmt.Errorf("parameter %s missing", PARAMETER_TARGET_DIR)
+	}
 
 	for {
 		logger.Debugf("backup started")
-		if err := createBackup(host, port, user, pass, database); err != nil {
+		if err := createBackup(host, port, user, pass, database, targetDir); err != nil {
 			return err
 		}
 		logger.Debugf("backup completed")
