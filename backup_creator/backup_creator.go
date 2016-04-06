@@ -8,6 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"io/ioutil"
+
+	"github.com/bborbe/io/util"
 	"github.com/bborbe/log"
 )
 
@@ -31,6 +34,11 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 		logger.Debugf("skip backup ")
 		return nil
 	}
+
+	if err := writePasswordFile(host, port, user, pass); err != nil {
+		return err
+	}
+
 	logger.Debugf("pg_dump started")
 	_, err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database})
 	if err != nil {
@@ -38,6 +46,15 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 	}
 	logger.Debugf("pg_dump finshed")
 	return nil
+}
+
+func writePasswordFile(host string, port int, user string, pass string) error {
+	content := fmt.Sprintf("%s:%d:*:%s:%s\n", host, port, user, pass)
+	path, err := util.NormalizePath("~/.pgpass")
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path, []byte(content), 0600)
 }
 
 func buildBackupfileName(targetDirectory string, database string, date time.Time) string {
