@@ -1,11 +1,13 @@
 package main
 
 import (
-	flag "github.com/bborbe/flagenv"
-	"github.com/bborbe/log"
+	"fmt"
 	"io"
 	"os"
-	"fmt"
+	"time"
+
+	flag "github.com/bborbe/flagenv"
+	"github.com/bborbe/log"
 )
 
 var logger = log.DefaultLogger
@@ -18,6 +20,8 @@ const (
 	PARAMETER_POSTGRES_DATABASE = "database"
 	PARAMETER_POSTGRES_USER = "user"
 	PARAMETER_POSTGRES_PASSWORD = "password"
+	PARAMETER_WAIT = "wait"
+	PARAMETER_ONE_TIME = "one-time"
 )
 
 func main() {
@@ -28,13 +32,15 @@ func main() {
 	databasePtr := flag.String(PARAMETER_POSTGRES_DATABASE, "", "database")
 	userPtr := flag.String(PARAMETER_POSTGRES_USER, "", "user")
 	passwordPtr := flag.String(PARAMETER_POSTGRES_PASSWORD, "", "password")
+	waitPtr := flag.Duration(PARAMETER_WAIT, time.Minute * 60, "wait")
+	oneTimePtr := flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
 
 	writer := os.Stdout
-	err := do(writer, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr)
+	err := do(writer, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *waitPtr, *oneTimePtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -42,8 +48,10 @@ func main() {
 	}
 }
 
-func do(writer io.Writer, host string, port int, user string, pass string, database string) error {
+func do(writer io.Writer, host string, port int, user string, pass string, database string, wait time.Duration, oneTime bool) error {
 	logger.Debug("start")
+	defer logger.Debug("done")
+
 	if len(host) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_HOST)
 	}
@@ -59,6 +67,15 @@ func do(writer io.Writer, host string, port int, user string, pass string, datab
 	if len(database) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_DATABASE)
 	}
-	logger.Debug("done")
-	return nil
+
+	for {
+
+		if oneTime {
+			return nil
+		}
+
+		logger.Debugf("wait %d", wait)
+		time.Sleep(wait)
+		logger.Debugf("done")
+	}
 }
