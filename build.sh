@@ -57,8 +57,8 @@ aptly_upload \
 -loglevel=DEBUG \
 -url=https://www.benjamin-borbe.de/aptly \
 -username=api \
--password=$HOME/aptly_api_password \
+-passwordfile=$HOME/aptly_api_password \
 -file=$DEB \
--repo=unstable || exit 1
+-repo=unstable
 
 echo "Upload completed"
