@@ -8,6 +8,7 @@ import (
 
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/log"
+	"github.com/bborbe/postgres_backup_cron/backup_creator"
 )
 
 var logger = log.DefaultLogger
@@ -15,14 +16,16 @@ var logger = log.DefaultLogger
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
 
-	PARAMETER_POSTGRES_HOST = "host"
-	PARAMETER_POSTGRES_PORT = "port"
+	PARAMETER_POSTGRES_HOST     = "host"
+	PARAMETER_POSTGRES_PORT     = "port"
 	PARAMETER_POSTGRES_DATABASE = "database"
-	PARAMETER_POSTGRES_USER = "user"
+	PARAMETER_POSTGRES_USER     = "user"
 	PARAMETER_POSTGRES_PASSWORD = "password"
-	PARAMETER_WAIT = "wait"
-	PARAMETER_ONE_TIME = "one-time"
+	PARAMETER_WAIT              = "wait"
+	PARAMETER_ONE_TIME          = "one-time"
 )
+
+type CreateBackup func(host string, port int, user string, pass string, database string) error
 
 func main() {
 	defer logger.Close()
@@ -32,15 +35,17 @@ func main() {
 	databasePtr := flag.String(PARAMETER_POSTGRES_DATABASE, "", "database")
 	userPtr := flag.String(PARAMETER_POSTGRES_USER, "", "user")
 	passwordPtr := flag.String(PARAMETER_POSTGRES_PASSWORD, "", "password")
-	waitPtr := flag.Duration(PARAMETER_WAIT, time.Minute * 60, "wait")
+	waitPtr := flag.Duration(PARAMETER_WAIT, time.Minute*60, "wait")
 	oneTimePtr := flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
 
+	backupCreator := backup_creator.New()
+
 	writer := os.Stdout
-	err := do(writer, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *waitPtr, *oneTimePtr)
+	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *waitPtr, *oneTimePtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -48,7 +53,7 @@ func main() {
 	}
 }
 
-func do(writer io.Writer, host string, port int, user string, pass string, database string, wait time.Duration, oneTime bool) error {
+func do(writer io.Writer, createBackup CreateBackup, host string, port int, user string, pass string, database string, wait time.Duration, oneTime bool) error {
 	logger.Debug("start")
 	defer logger.Debug("done")
 
@@ -69,6 +74,11 @@ func do(writer io.Writer, host string, port int, user string, pass string, datab
 	}
 
 	for {
+		logger.Debugf("backup started")
+		if err := createBackup(host, port, user, pass, database); err != nil {
+			return err
+		}
+		logger.Debugf("backup completed")
 
 		if oneTime {
 			return nil
