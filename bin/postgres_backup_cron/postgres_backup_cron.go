@@ -64,8 +64,8 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 		return err
 	}
 	defer l.Unlock()
-	logger.Debug("start")
-	defer logger.Debug("done")
+	logger.Debug("backup cleanup cron started")
+	defer logger.Debug("backup cleanup cron finished")
 
 	if len(host) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_HOST)
@@ -101,6 +101,6 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 
 		logger.Debugf("wait %v", wait)
 		time.Sleep(wait)
-		logger.Debugf("done")
+		logger.Debugf("sleep done")
 	}
 }
