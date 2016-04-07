@@ -30,7 +30,7 @@ func New() *backupCreator {
 func (b *backupCreator) CreateBackup(host string, port int, user string, pass string, database string, targetDirectory string) error {
 	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
 	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
-	if _, err := os.Stat(backupfile); os.IsExist(err) {
+	if _, err := os.Stat(backupfile); err == nil {
 		logger.Debugf("skip backup ")
 		return nil
 	}
