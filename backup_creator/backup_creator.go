@@ -30,8 +30,9 @@ func New() *backupCreator {
 func (b *backupCreator) CreateBackup(host string, port int, user string, pass string, database string, targetDirectory string) error {
 	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
 	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
-	if _, err := os.Stat(backupfile); err == nil {
-		logger.Debugf("skip backup ")
+
+	if existsBackup(backupfile) {
+		logger.Debugf("backup %s already exists => skip", backupfile)
 		return nil
 	}
 
@@ -46,6 +47,20 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 	}
 	logger.Debugf("pg_dump finshed")
 	return nil
+}
+
+func existsBackup(backupfile string) bool {
+	fileInfo, err := os.Stat(backupfile)
+	if err != nil {
+		logger.Debugf("file %s exists => true")
+		return false
+	}
+	if fileInfo.Size() == 0 {
+		logger.Debugf("file %s empty => true")
+		return false
+	}
+	logger.Debugf("file %s exists and not empty => false")
+	return false
 }
 
 func writePasswordFile(host string, port int, user string, pass string) error {
