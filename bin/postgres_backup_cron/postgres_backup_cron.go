@@ -6,11 +6,12 @@ import (
 	"os"
 	"time"
 
+	"runtime"
+
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
 	"github.com/bborbe/log"
 	"github.com/bborbe/postgres_backup_cron/backup_creator"
-	"runtime"
 )
 
 const (
