@@ -1,0 +1,17 @@
+hash: 49667807fdbd81434c30032e27fa1aac7aaf740e8a0c3753cbd7f914db4edd8e
+updated: 2016-08-24T18:24:46.741778818+02:00
+imports:
+- name: github.com/bborbe/flagenv
+  version: a711a961081a928e1a3bfe2a047d59a69fa6b506
+- name: github.com/bborbe/io
+  version: 56d91e8345e4418981a56bc4b8466b4096138f08
+  subpackages:
+  - util
+  - buffered_writer
+- name: github.com/bborbe/lock
+  version: 468ed08fdb198bf91506d31f8813b932b2a3fd56
+- name: github.com/bborbe/log
+  version: 0250bb5b2e2bd833cb9a47333c28aa46751cdbfe
+testImports:
+- name: github.com/bborbe/assert
+  version: cd6d0ec67c40ced8ca6cf72773b9e4b44420fbd2

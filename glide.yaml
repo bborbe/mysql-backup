@@ -1,0 +1,10 @@
+package: github.com/bborbe/postgres_backup_cron
+import:
+- package: github.com/bborbe/flagenv
+- package: github.com/bborbe/io
+  subpackages:
+  - util
+- package: github.com/bborbe/lock
+- package: github.com/bborbe/log
+testImport:
+- package: github.com/bborbe/assert
