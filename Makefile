@@ -1,7 +1,7 @@
 install:
 	GOBIN=$(GOPATH)/bin GO15VENDOREXPERIMENT=1 go install bin/postgres_backup_cron/postgres_backup_cron.go
 test:
-	GO15VENDOREXPERIMENT=1 go test `glide novendor`
+	GO15VENDOREXPERIMENT=1 go test -cover `glide novendor`
 vet:
 	go tool vet .
 	go tool vet --shadow .
