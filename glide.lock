@@ -1,0 +1,16 @@
+hash: 7721219a40073fccba045a475bfcec162b9b11e2798332ab286c156611ed9b57
+updated: 2016-08-29T00:13:07.899483738+02:00
+imports:
+- name: github.com/bborbe/flagenv
+  version: ddf8de6851137e93b8384e2c3a30995ac830f56a
+- name: github.com/bborbe/io
+  version: 5891c542e99ec05e63ac475bc8a2202b2fca02aa
+  subpackages:
+  - util
+- name: github.com/bborbe/lock
+  version: 6b48c4e132e393b8fafbbd59ee082dddcfb537fa
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+testImports:
+- name: github.com/bborbe/assert
+  version: 639eac9a24e3c01472758f3c79452b8517bc29f6
