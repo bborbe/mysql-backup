@@ -12,7 +12,8 @@ errcheck:
 check: lint vet errcheck
 run:
 	postgres_backup_cron \
-	-loglevel=debug \
+	-logtostderr \
+	-v=2 \
 	-host=localhost \
 	-port=5432 \
 	-lock=/tmp/lock \

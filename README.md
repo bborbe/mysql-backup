@@ -10,7 +10,8 @@ One time
 
 ```
 postgres_backup_cron \
--loglevel=debug \ 
+-logtostderr \
+-v=2 \
 -host=localhost \
 -port=5432 \
 -lock=/tmp/lock \ 
@@ -25,7 +26,8 @@ Cron
 
 ```
 postgres_backup_cron \
--loglevel=debug \ 
+-logtostderr \
+-v=2 \
 -host=localhost \
 -port=5432 \
 -lock=/tmp/lock \ 
