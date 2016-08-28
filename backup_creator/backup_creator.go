@@ -11,10 +11,8 @@ import (
 	"io/ioutil"
 
 	"github.com/bborbe/io/util"
-	"github.com/bborbe/log"
+	"github.com/golang/glog"
 )
-
-var logger = log.DefaultLogger
 
 type backupCreator struct {
 }
@@ -32,7 +30,7 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
 
 	if existsBackup(backupfile) {
-		logger.Debugf("backup %s already exists => skip", backupfile)
+		glog.V(2).Infof("backup %s already exists => skip", backupfile)
 		return nil
 	}
 
@@ -40,26 +38,26 @@ func (b *backupCreator) CreateBackup(host string, port int, user string, pass st
 		return err
 	}
 
-	logger.Debugf("pg_dump started")
+	glog.V(2).Infof("pg_dump started")
 	_, err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database})
 	if err != nil {
 		return err
 	}
-	logger.Debugf("pg_dump finshed")
+	glog.V(2).Infof("pg_dump finshed")
 	return nil
 }
 
 func existsBackup(backupfile string) bool {
 	fileInfo, err := os.Stat(backupfile)
 	if err != nil {
-		logger.Debugf("file %s exists => true")
+		glog.V(2).Infof("file %s exists => true")
 		return false
 	}
 	if fileInfo.Size() == 0 {
-		logger.Debugf("file %s empty => true")
+		glog.V(2).Infof("file %s empty => true")
 		return false
 	}
-	logger.Debugf("file %s exists and not empty => false")
+	glog.V(2).Infof("file %s exists and not empty => false")
 	return false
 }
 
@@ -77,7 +75,7 @@ func buildBackupfileName(targetDirectory string, database string, date time.Time
 }
 
 func runCommand(command, cwd string, args []string) ([]byte, error) {
-	logger.Debugf("%s %s", command, strings.Join(args, " "))
+	glog.V(2).Infof("%s %s", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
 	if cwd != "" {
 		cmd.Dir = cwd

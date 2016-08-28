@@ -5,6 +5,6 @@ import:
   subpackages:
   - util
 - package: github.com/bborbe/lock
-- package: github.com/bborbe/log
+- package: github.com/golang/glog
 testImport:
 - package: github.com/bborbe/assert

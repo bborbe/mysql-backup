@@ -10,13 +10,12 @@ import (
 
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/log"
 	"github.com/bborbe/postgres_backup_cron/backup_creator"
+	"github.com/golang/glog"
 )
 
 const (
 	LOCK_NAME                   = "/var/run/postgres_backup_cron.lock"
-	PARAMETER_LOGLEVEL          = "loglevel"
 	PARAMETER_POSTGRES_HOST     = "host"
 	PARAMETER_POSTGRES_PORT     = "port"
 	PARAMETER_POSTGRES_DATABASE = "database"
@@ -29,8 +28,6 @@ const (
 )
 
 var (
-	logger       = log.DefaultLogger
-	logLevelPtr  = flag.String(PARAMETER_LOGLEVEL, log.INFO_STRING, "one of OFF,TRACE,DEBUG,INFO,WARN,ERROR")
 	hostPtr      = flag.String(PARAMETER_POSTGRES_HOST, "", "host")
 	portPtr      = flag.Int(PARAMETER_POSTGRES_PORT, 5432, "port")
 	databasePtr  = flag.String(PARAMETER_POSTGRES_DATABASE, "", "database")
@@ -45,21 +42,16 @@ var (
 type CreateBackup func(host string, port int, user string, pass string, database string, targetDir string) error
 
 func main() {
-	defer logger.Close()
+	defer glog.Flush()
+	glog.CopyStandardLogTo("info")
 	flag.Parse()
-
-	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
-	logger.Debugf("set log level to %s", *logLevelPtr)
-
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	backupCreator := backup_creator.New()
 	writer := os.Stdout
 	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *targetDirPtr, *waitPtr, *oneTimePtr, *lockPtr)
 	if err != nil {
-		logger.Fatal(err)
-		logger.Close()
-		os.Exit(1)
+		glog.Exit(err)
 	}
 }
 
@@ -69,8 +61,8 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 		return err
 	}
 	defer l.Unlock()
-	logger.Debug("backup cleanup cron started")
-	defer logger.Debug("backup cleanup cron finished")
+	glog.V(2).Info("backup cleanup cron started")
+	defer glog.V(2).Info("backup cleanup cron finished")
 
 	if len(host) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_HOST)
@@ -91,21 +83,21 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 		return fmt.Errorf("parameter %s missing", PARAMETER_TARGET_DIR)
 	}
 
-	logger.Debugf("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
+	glog.V(2).Infof("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
 
 	for {
-		logger.Debugf("backup started")
+		glog.V(2).Infof("backup started")
 		if err := createBackup(host, port, user, pass, database, targetDir); err != nil {
 			return err
 		}
-		logger.Debugf("backup completed")
+		glog.V(2).Infof("backup completed")
 
 		if oneTime {
 			return nil
 		}
 
-		logger.Debugf("wait %v", wait)
+		glog.V(2).Infof("wait %v", wait)
 		time.Sleep(wait)
-		logger.Debugf("sleep done")
+		glog.V(2).Infof("sleep done")
 	}
 }
