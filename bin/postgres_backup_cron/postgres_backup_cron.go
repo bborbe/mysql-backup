@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"time"
 
 	"runtime"
@@ -15,28 +13,28 @@ import (
 )
 
 const (
-	LOCK_NAME                   = "/var/run/postgres_backup_cron.lock"
-	PARAMETER_POSTGRES_HOST     = "host"
-	PARAMETER_POSTGRES_PORT     = "port"
-	PARAMETER_POSTGRES_DATABASE = "database"
-	PARAMETER_POSTGRES_USER     = "username"
-	PARAMETER_POSTGRES_PASSWORD = "password"
-	PARAMETER_TARGET_DIR        = "targetdir"
-	PARAMETER_WAIT              = "wait"
-	PARAMETER_ONE_TIME          = "one-time"
-	PARAMETER_LOCK              = "lock"
+	lockName                  = "/var/run/postgres_backup_cron.lock"
+	parameterPostgresHost     = "host"
+	parameterPostgresPort     = "port"
+	parameterPostgresDatabase = "database"
+	parameterPostgresUser     = "username"
+	parameterPostgresPassword = "password"
+	parameterTargetDir        = "targetdir"
+	parameterWait             = "wait"
+	parameterOneTime          = "one-time"
+	parameterLock             = "lock"
 )
 
 var (
-	hostPtr      = flag.String(PARAMETER_POSTGRES_HOST, "", "host")
-	portPtr      = flag.Int(PARAMETER_POSTGRES_PORT, 5432, "port")
-	databasePtr  = flag.String(PARAMETER_POSTGRES_DATABASE, "", "database")
-	userPtr      = flag.String(PARAMETER_POSTGRES_USER, "", "username")
-	passwordPtr  = flag.String(PARAMETER_POSTGRES_PASSWORD, "", "password")
-	waitPtr      = flag.Duration(PARAMETER_WAIT, time.Minute*60, "wait")
-	oneTimePtr   = flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
-	targetDirPtr = flag.String(PARAMETER_TARGET_DIR, "", "target directory")
-	lockPtr      = flag.String(PARAMETER_LOCK, LOCK_NAME, "lock")
+	hostPtr      = flag.String(parameterPostgresHost, "", "host")
+	portPtr      = flag.Int(parameterPostgresPort, 5432, "port")
+	databasePtr  = flag.String(parameterPostgresDatabase, "", "database")
+	userPtr      = flag.String(parameterPostgresUser, "", "username")
+	passwordPtr  = flag.String(parameterPostgresPassword, "", "password")
+	waitPtr      = flag.Duration(parameterWait, time.Minute*60, "wait")
+	oneTimePtr   = flag.Bool(parameterOneTime, false, "exit after first backup")
+	targetDirPtr = flag.String(parameterTargetDir, "", "target directory")
+	lockPtr      = flag.String(parameterLock, lockName, "lock")
 )
 
 type CreateBackup func(host string, port int, user string, pass string, database string, targetDir string) error
@@ -48,14 +46,35 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	backupCreator := backup_creator.New()
-	writer := os.Stdout
-	err := do(writer, backupCreator.CreateBackup, *hostPtr, *portPtr, *userPtr, *passwordPtr, *databasePtr, *targetDirPtr, *waitPtr, *oneTimePtr, *lockPtr)
+	err := do(
+		backupCreator.CreateBackup,
+		*hostPtr,
+		*portPtr,
+		*userPtr,
+		*passwordPtr,
+		*databasePtr,
+		*targetDirPtr,
+		*waitPtr,
+		*oneTimePtr,
+		*lockPtr,
+	)
 	if err != nil {
 		glog.Exit(err)
 	}
 }
 
-func do(writer io.Writer, createBackup CreateBackup, host string, port int, user string, pass string, database string, targetDir string, wait time.Duration, oneTime bool, lockName string) error {
+func do(
+	createBackup CreateBackup,
+	host string,
+	port int,
+	user string,
+	pass string,
+	database string,
+	targetDir string,
+	wait time.Duration,
+	oneTime bool,
+	lockName string,
+) error {
 	l := lock.NewLock(lockName)
 	if err := l.Lock(); err != nil {
 		return err
@@ -65,22 +84,22 @@ func do(writer io.Writer, createBackup CreateBackup, host string, port int, user
 	defer glog.V(2).Info("backup cleanup cron finished")
 
 	if len(host) == 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_HOST)
+		return fmt.Errorf("parameter %s missing", parameterPostgresHost)
 	}
 	if port <= 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_PORT)
+		return fmt.Errorf("parameter %s missing", parameterPostgresPort)
 	}
 	if len(user) == 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_USER)
+		return fmt.Errorf("parameter %s missing", parameterPostgresUser)
 	}
 	if len(pass) == 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_PASSWORD)
+		return fmt.Errorf("parameter %s missing", parameterPostgresPassword)
 	}
 	if len(database) == 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_POSTGRES_DATABASE)
+		return fmt.Errorf("parameter %s missing", parameterPostgresDatabase)
 	}
 	if len(targetDir) == 0 {
-		return fmt.Errorf("parameter %s missing", PARAMETER_TARGET_DIR)
+		return fmt.Errorf("parameter %s missing", parameterTargetDir)
 	}
 
 	glog.V(2).Infof("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
