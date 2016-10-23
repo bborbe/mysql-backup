@@ -24,13 +24,13 @@ func (b BackupFilename) String() string {
 func (b BackupFilename) Exists() bool {
 	fileInfo, err := os.Stat(b.String())
 	if err != nil {
-		glog.V(2).Infof("file %s exists => true")
+		glog.V(2).Infof("file %v exists => false", b)
 		return false
 	}
 	if fileInfo.Size() == 0 {
-		glog.V(2).Infof("file %s empty => true")
+		glog.V(2).Infof("file %v empty => false", b)
 		return false
 	}
-	glog.V(2).Infof("file %s exists and not empty => false")
-	return false
+	glog.V(2).Infof("file %v exists and not empty => true", b)
+	return true
 }
