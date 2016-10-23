@@ -9,6 +9,7 @@ import (
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
 	"github.com/bborbe/postgres_backup_cron/backup"
+	"github.com/bborbe/postgres_backup_cron/model"
 	"github.com/golang/glog"
 )
 
@@ -67,27 +68,27 @@ func do() error {
 }
 
 func exec() error {
-	host := *hostPtr
+	host := model.PostgresqlHost(*hostPtr)
 	if len(host) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresHost)
 	}
-	port := *portPtr
+	port := model.PostgresqlPort(*portPtr)
 	if port <= 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresPort)
 	}
-	user := *userPtr
+	user := model.PostgresqlUser(*userPtr)
 	if len(user) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresUser)
 	}
-	pass := *passwordPtr
+	pass := model.PostgresqlPassword(*passwordPtr)
 	if len(pass) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresPassword)
 	}
-	database := *databasePtr
+	database := model.PostgresqlDatabase(*databasePtr)
 	if len(database) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresDatabase)
 	}
-	targetDir := *targetDirPtr
+	targetDir := model.TargetDirectory(*targetDirPtr)
 	if len(targetDir) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterTargetDir)
 	}

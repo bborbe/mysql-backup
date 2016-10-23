@@ -4,29 +4,29 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
 	"io/ioutil"
 
 	"github.com/bborbe/io/util"
+	"github.com/bborbe/postgres_backup_cron/model"
 	"github.com/golang/glog"
 )
 
 // Create backup
 func Create(
-	host string,
-	port int,
-	user string,
-	pass string,
-	database string,
-	targetDirectory string,
+	host model.PostgresqlHost,
+	port model.PostgresqlPort,
+	user model.PostgresqlUser,
+	pass model.PostgresqlPassword,
+	database model.PostgresqlDatabase,
+	targetDirectory model.TargetDirectory,
 ) error {
 	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
-	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
+	backupfile := model.BuildBackupfileName(targetDirectory, database, time.Now())
 
-	if existsBackup(backupfile) {
+	if backupfile.Exists() {
 		glog.V(1).Infof("backup %s already exists => skip", backupfile)
 		return nil
 	}
@@ -36,28 +36,18 @@ func Create(
 	}
 
 	glog.V(1).Infof("pg_dump started")
-	if err := runCommand("pg_dump", targetDirectory, "-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database); err != nil {
+	if err := runCommand("pg_dump", targetDirectory, "-Z", "9", "-h", host.String(), "-p", port.String(), "-U", user.String(), "-F", "c", "-b", "-v", "-f", backupfile.String(), database.String()); err != nil {
+		glog.V(2).Infof("pg_dump failed, delete incomplete backup: %v", err)
+		if err := backupfile.Delete(); err != nil {
+			glog.Warningf("delete incomplete backup failed: %v", err)
+		}
 		return err
 	}
 	glog.V(1).Infof("pg_dump finshed")
 	return nil
 }
 
-func existsBackup(backupfile string) bool {
-	fileInfo, err := os.Stat(backupfile)
-	if err != nil {
-		glog.V(2).Infof("file %s exists => true")
-		return false
-	}
-	if fileInfo.Size() == 0 {
-		glog.V(2).Infof("file %s empty => true")
-		return false
-	}
-	glog.V(2).Infof("file %s exists and not empty => false")
-	return false
-}
-
-func writePasswordFile(host string, port int, user string, pass string) error {
+func writePasswordFile(host model.PostgresqlHost, port model.PostgresqlPort, user model.PostgresqlUser, pass model.PostgresqlPassword) error {
 	content := fmt.Sprintf("%s:%d:*:%s:%s\n", host, port, user, pass)
 	path, err := util.NormalizePath("~/.pgpass")
 	if err != nil {
@@ -66,11 +56,7 @@ func writePasswordFile(host string, port int, user string, pass string) error {
 	return ioutil.WriteFile(path, []byte(content), 0600)
 }
 
-func buildBackupfileName(targetDirectory string, database string, date time.Time) string {
-	return fmt.Sprintf("%s/postgres_%s_%s.dump", targetDirectory, database, date.Format("2006-01-02"))
-}
-
-func runCommand(command, cwd string, args ...string) error {
+func runCommand(command string, cwd model.TargetDirectory, args ...string) error {
 	debug := fmt.Sprintf("%s %s", command, strings.Join(args, " "))
 	glog.V(2).Infof("execute %s", debug)
 	cmd := exec.Command(command, args...)
@@ -79,7 +65,7 @@ func runCommand(command, cwd string, args ...string) error {
 		cmd.Stdout = os.Stdout
 	}
 	if cwd != "" {
-		cmd.Dir = cwd
+		cmd.Dir = cwd.String()
 	}
 	if err := cmd.Start(); err != nil {
 		return err
