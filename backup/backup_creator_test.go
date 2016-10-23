@@ -23,3 +23,10 @@ func TestBuildBackupfileName(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRunCommand(t *testing.T) {
+	err := runCommand("ls", "/")
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+}
