@@ -1,4 +1,4 @@
-package backup_creator
+package backup
 
 import (
 	"fmt"
@@ -14,18 +14,15 @@ import (
 	"github.com/golang/glog"
 )
 
-type backupCreator struct {
-}
-
-type BackupCreator interface {
-	CreateBackup(host string, port int, user string, pass string, database string, targetDirectory string) error
-}
-
-func New() *backupCreator {
-	return new(backupCreator)
-}
-
-func (b *backupCreator) CreateBackup(host string, port int, user string, pass string, database string, targetDirectory string) error {
+// Create backup
+func Create(
+	host string,
+	port int,
+	user string,
+	pass string,
+	database string,
+	targetDirectory string,
+) error {
 	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
 	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
 

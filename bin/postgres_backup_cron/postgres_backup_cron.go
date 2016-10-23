@@ -8,7 +8,7 @@ import (
 
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/postgres_backup_cron/backup_creator"
+	"github.com/bborbe/postgres_backup_cron/backup"
 	"github.com/golang/glog"
 )
 
@@ -37,81 +37,76 @@ var (
 	lockPtr      = flag.String(parameterLock, lockName, "lock")
 )
 
-type CreateBackup func(host string, port int, user string, pass string, database string, targetDir string) error
-
 func main() {
 	defer glog.Flush()
 	glog.CopyStandardLogTo("info")
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	backupCreator := backup_creator.New()
-	err := do(
-		backupCreator.CreateBackup,
-		*hostPtr,
-		*portPtr,
-		*userPtr,
-		*passwordPtr,
-		*databasePtr,
-		*targetDirPtr,
-		*waitPtr,
-		*oneTimePtr,
-		*lockPtr,
-	)
-	if err != nil {
+	if err := do(); err != nil {
 		glog.Exit(err)
 	}
 }
 
-func do(
-	createBackup CreateBackup,
-	host string,
-	port int,
-	user string,
-	pass string,
-	database string,
-	targetDir string,
-	wait time.Duration,
-	oneTime bool,
-	lockName string,
-) error {
+func do() error {
+	lockName := *lockPtr
 	l := lock.NewLock(lockName)
 	if err := l.Lock(); err != nil {
 		return err
 	}
-	defer l.Unlock()
-	glog.V(2).Info("backup cleanup cron started")
-	defer glog.V(2).Info("backup cleanup cron finished")
+	defer func() {
+		if err := l.Unlock(); err != nil {
+			glog.Warningf("unlock failed: %v", err)
+		}
+	}()
 
+	glog.V(1).Info("backup cleanup cron started")
+	defer glog.V(1).Info("backup cleanup cron finished")
+
+	return exec()
+}
+
+func exec() error {
+	host := *hostPtr
 	if len(host) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresHost)
 	}
+	port := *portPtr
 	if port <= 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresPort)
 	}
+	user := *userPtr
 	if len(user) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresUser)
 	}
+	pass := *passwordPtr
 	if len(pass) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresPassword)
 	}
+	database := *databasePtr
 	if len(database) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterPostgresDatabase)
 	}
+	targetDir := *targetDirPtr
 	if len(targetDir) == 0 {
 		return fmt.Errorf("parameter %s missing", parameterTargetDir)
 	}
 
-	glog.V(2).Infof("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
+	oneTime := *oneTimePtr
+	wait := *waitPtr
+
+	glog.V(1).Infof("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
 
 	for {
 		glog.V(2).Infof("backup started")
-		if err := createBackup(host, port, user, pass, database, targetDir); err != nil {
-			return err
+		if err := backup.Create(host, port, user, pass, database, targetDir); err != nil {
+			glog.Warningf("backup failed: %v", err)
+		} else {
+			glog.V(2).Infof("backup completed")
 		}
-		glog.V(2).Infof("backup completed")
 
 		if oneTime {
+			glog.V(2).Infof("one time => exit")
 			return nil
 		}
 

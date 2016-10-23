@@ -1,10 +1,9 @@
-package main
+package backup
 
 import (
-	"testing"
-
 	"github.com/golang/glog"
 	"os"
+	"testing"
 )
 
 func TestMain(m *testing.M) {
