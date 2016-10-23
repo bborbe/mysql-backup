@@ -36,8 +36,7 @@ func Create(
 	}
 
 	glog.V(2).Infof("pg_dump started")
-	_, err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database})
-	if err != nil {
+	if err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database}); err != nil {
 		return err
 	}
 	glog.V(2).Infof("pg_dump finshed")
@@ -71,16 +70,14 @@ func buildBackupfileName(targetDirectory string, database string, date time.Time
 	return fmt.Sprintf("%s/postgres_%s_%s.dump", targetDirectory, database, date.Format("2006-01-02"))
 }
 
-func runCommand(command, cwd string, args []string) ([]byte, error) {
+func runCommand(command, cwd string, args []string) error {
 	glog.V(2).Infof("%s %s", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
 	if cwd != "" {
 		cmd.Dir = cwd
 	}
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return []byte{}, fmt.Errorf("error running command %q : %v: %s", strings.Join(cmd.Args, " "), err, string(output))
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("error running command %q : %v: %s", strings.Join(cmd.Args, " "), err, string(output))
 	}
-
-	return output, nil
+	return nil
 }
