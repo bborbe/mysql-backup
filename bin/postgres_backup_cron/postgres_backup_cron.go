@@ -95,14 +95,14 @@ func exec() error {
 	oneTime := *oneTimePtr
 	wait := *waitPtr
 
-	glog.V(1).Infof("host: %s, port: %d, user: %s, pass: %s, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, pass, database, targetDir, wait, oneTime, lockName)
+	glog.V(1).Infof("host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, len(pass), database, targetDir, wait, oneTime, lockName)
 
 	for {
-		glog.V(2).Infof("backup started")
+		glog.V(1).Infof("backup started")
 		if err := backup.Create(host, port, user, pass, database, targetDir); err != nil {
 			glog.Warningf("backup failed: %v", err)
 		} else {
-			glog.V(2).Infof("backup completed")
+			glog.V(1).Infof("backup completed")
 		}
 
 		if oneTime {

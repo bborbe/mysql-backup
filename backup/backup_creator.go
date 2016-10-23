@@ -27,7 +27,7 @@ func Create(
 	backupfile := buildBackupfileName(targetDirectory, database, time.Now())
 
 	if existsBackup(backupfile) {
-		glog.V(2).Infof("backup %s already exists => skip", backupfile)
+		glog.V(1).Infof("backup %s already exists => skip", backupfile)
 		return nil
 	}
 
@@ -35,11 +35,11 @@ func Create(
 		return err
 	}
 
-	glog.V(2).Infof("pg_dump started")
+	glog.V(1).Infof("pg_dump started")
 	if err := runCommand("pg_dump", targetDirectory, []string{"-Z", "9", "-h", host, "-p", strconv.Itoa(port), "-U", user, "-F", "c", "-b", "-v", "-f", backupfile, database}); err != nil {
 		return err
 	}
-	glog.V(2).Infof("pg_dump finshed")
+	glog.V(1).Infof("pg_dump finshed")
 	return nil
 }
 
