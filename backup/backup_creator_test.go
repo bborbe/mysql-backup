@@ -1,10 +1,11 @@
 package backup
 
 import (
-	. "github.com/bborbe/assert"
-	"github.com/golang/glog"
 	"os"
 	"testing"
+
+	. "github.com/bborbe/assert"
+	"github.com/golang/glog"
 )
 
 func TestMain(m *testing.M) {

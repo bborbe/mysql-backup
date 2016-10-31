@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"io/ioutil"
+
 	. "github.com/bborbe/assert"
 	"github.com/golang/glog"
-	"io/ioutil"
 )
 
 func TestMain(m *testing.M) {

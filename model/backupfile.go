@@ -2,9 +2,10 @@ package model
 
 import (
 	"fmt"
-	"github.com/golang/glog"
 	"os"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 type BackupFilename string
