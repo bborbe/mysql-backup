@@ -6,6 +6,8 @@ import (
 
 	"runtime"
 
+	"context"
+	"github.com/bborbe/cron"
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
 	"github.com/bborbe/postgres_backup_cron/backup"
@@ -98,21 +100,14 @@ func exec() error {
 
 	glog.V(1).Infof("host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, len(pass), database, targetDir, wait, oneTime, lockName)
 
-	for {
-		glog.V(1).Infof("backup started")
-		if err := backup.Create(host, port, user, pass, database, targetDir); err != nil {
-			glog.Warningf("backup failed: %v", err)
-		} else {
-			glog.V(1).Infof("backup completed")
-		}
-
-		if oneTime {
-			glog.V(2).Infof("one time => exit")
-			return nil
-		}
-
-		glog.V(2).Infof("wait %v", wait)
-		time.Sleep(wait)
-		glog.V(2).Infof("sleep done")
+	action := func(ctx context.Context) error {
+		return backup.Create(host, port, user, pass, database, targetDir)
 	}
+
+	cron := cron.New(
+		oneTime,
+		wait,
+		action,
+	)
+	return cron.Run(context.Background())
 }
