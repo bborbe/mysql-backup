@@ -40,7 +40,7 @@ postgres_backup_cron \
 
 ## Continuous integration
 
-[Jenkins](https://www.benjamin-borbe.de/jenkins/job/Go-Postgres-Backup-Cron/)
+[Jenkins](https://jenkins.benjamin-borbe.de/job/Go-Postgres-Backup-Cron/)
 
 ## Copyright and license
 
