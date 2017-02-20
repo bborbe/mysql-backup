@@ -63,8 +63,8 @@ func do() error {
 		}
 	}()
 
-	glog.V(1).Info("backup cleanup cron started")
-	defer glog.V(1).Info("backup cleanup cron finished")
+	glog.V(1).Info("backup postgres cron started")
+	defer glog.V(1).Info("backup postgres cron finished")
 
 	return exec()
 }
