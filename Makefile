@@ -23,7 +23,7 @@ run:
 	-database=db \
 	-targetdir=/tmp \
 	-name=postgres \
-	-wait=1h
+	-one-time
 format:
 	find . -name "*.go" -exec gofmt -w "{}" \;
 	goimports -w=true .
