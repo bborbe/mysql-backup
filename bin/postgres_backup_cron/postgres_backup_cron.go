@@ -16,30 +16,31 @@ import (
 )
 
 const (
-	lockName = "/var/run/postgres_backup_cron.lock"
-	parameterPostgresHost = "host"
-	parameterPostgresPort = "port"
+	defaultLockName           = "/var/run/postgres_backup_cron.lock"
+	defaultName               = "postgres"
+	parameterPostgresHost     = "host"
+	parameterPostgresPort     = "port"
 	parameterPostgresDatabase = "database"
-	parameterPostgresUser = "username"
+	parameterPostgresUser     = "username"
 	parameterPostgresPassword = "password"
-	parameterTargetDir = "targetdir"
-	parameterWait = "wait"
-	parameterOneTime = "one-time"
-	parameterLock = "lock"
-	parameterName = "name"
+	parameterTargetDir        = "targetdir"
+	parameterWait             = "wait"
+	parameterOneTime          = "one-time"
+	parameterLock             = "lock"
+	parameterName             = "name"
 )
 
 var (
-	hostPtr = flag.String(parameterPostgresHost, "", "host")
-	portPtr = flag.Int(parameterPostgresPort, 5432, "port")
-	databasePtr = flag.String(parameterPostgresDatabase, "", "database")
-	userPtr = flag.String(parameterPostgresUser, "", "username")
-	passwordPtr = flag.String(parameterPostgresPassword, "", "password")
-	waitPtr = flag.Duration(parameterWait, time.Minute * 60, "wait")
-	oneTimePtr = flag.Bool(parameterOneTime, false, "exit after first backup")
+	hostPtr      = flag.String(parameterPostgresHost, "", "host")
+	portPtr      = flag.Int(parameterPostgresPort, 5432, "port")
+	databasePtr  = flag.String(parameterPostgresDatabase, "", "database")
+	userPtr      = flag.String(parameterPostgresUser, "", "username")
+	passwordPtr  = flag.String(parameterPostgresPassword, "", "password")
+	waitPtr      = flag.Duration(parameterWait, time.Minute*60, "wait")
+	oneTimePtr   = flag.Bool(parameterOneTime, false, "exit after first backup")
 	targetDirPtr = flag.String(parameterTargetDir, "", "target directory")
-	lockPtr = flag.String(parameterLock, lockName, "lock")
-	namePtr = flag.String(parameterName, "postgres", "name")
+	lockPtr      = flag.String(parameterLock, defaultLockName, "lock")
+	namePtr      = flag.String(parameterName, defaultName, "name")
 )
 
 func main() {
@@ -97,11 +98,15 @@ func exec() error {
 		return fmt.Errorf("parameter %s missing", parameterTargetDir)
 	}
 	name := model.Name(*namePtr)
+	if len(name) == 0 {
+		return fmt.Errorf("parameter %s missing", parameterName)
+	}
 
 	oneTime := *oneTimePtr
 	wait := *waitPtr
+	lockName := *lockPtr
 
-	glog.V(1).Infof("host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", host, port, user, len(pass), database, targetDir, wait, oneTime, lockName)
+	glog.V(1).Infof("name: %s, host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", name, host, port, user, len(pass), database, targetDir, wait, oneTime, lockName)
 
 	action := func(ctx context.Context) error {
 		return backup.Create(name, host, port, user, pass, database, targetDir)
