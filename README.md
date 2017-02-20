@@ -19,6 +19,7 @@ postgres_backup_cron \
 -password=S3CR3T \
 -database=db \
 -targetdir=/backup \
+-name=postgres \
 -one-time
 ```
 
@@ -35,6 +36,7 @@ postgres_backup_cron \
 -password=S3CR3T \
 -database=db \
 -targetdir=/backup \
+-name=postgres \
 -wait=1h
 ```
 

@@ -16,15 +16,16 @@ import (
 
 // Create backup
 func Create(
-	host model.PostgresqlHost,
-	port model.PostgresqlPort,
-	user model.PostgresqlUser,
-	pass model.PostgresqlPassword,
-	database model.PostgresqlDatabase,
-	targetDirectory model.TargetDirectory,
+name model.Name,
+host model.PostgresqlHost,
+port model.PostgresqlPort,
+user model.PostgresqlUser,
+pass model.PostgresqlPassword,
+database model.PostgresqlDatabase,
+targetDirectory model.TargetDirectory,
 ) error {
 	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
-	backupfile := model.BuildBackupfileName(targetDirectory, database, time.Now())
+	backupfile := model.BuildBackupfileName(name, targetDirectory, database, time.Now())
 
 	if backupfile.Exists() {
 		glog.V(1).Infof("backup %s already exists => skip", backupfile)

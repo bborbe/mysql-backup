@@ -10,8 +10,8 @@ import (
 
 type BackupFilename string
 
-func BuildBackupfileName(targetDirectory TargetDirectory, database PostgresqlDatabase, date time.Time) BackupFilename {
-	return BackupFilename(fmt.Sprintf("%s/postgres_%s_%s.dump", targetDirectory, database, date.Format("2006-01-02")))
+func BuildBackupfileName(name Name, targetDirectory TargetDirectory, database PostgresqlDatabase, date time.Time) BackupFilename {
+	return BackupFilename(fmt.Sprintf("%s/%s_%s_%s.dump", targetDirectory, name, database, date.Format("2006-01-02")))
 }
 
 func (b BackupFilename) Delete() error {

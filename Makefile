@@ -22,6 +22,7 @@ run:
 	-password=S3CR3T \
 	-database=db \
 	-targetdir=/tmp \
+	-name=postgres \
 	-wait=1h
 format:
 	find . -name "*.go" -exec gofmt -w "{}" \;
