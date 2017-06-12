@@ -1,4 +1,4 @@
-package: github.com/bborbe/postgres_backup_cron
+package: github.com/bborbe/mysql_backup_cron
 import:
 - package: github.com/bborbe/flagenv
 - package: github.com/bborbe/io

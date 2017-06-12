@@ -10,32 +10,32 @@ import (
 	"github.com/bborbe/cron"
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/postgres_backup_cron/backup"
-	"github.com/bborbe/postgres_backup_cron/model"
+	"github.com/bborbe/mysql_backup_cron/backup"
+	"github.com/bborbe/mysql_backup_cron/model"
 	"github.com/golang/glog"
 )
 
 const (
-	defaultLockName           = "/var/run/postgres_backup_cron.lock"
-	defaultName               = "postgres"
-	parameterPostgresHost     = "host"
-	parameterPostgresPort     = "port"
-	parameterPostgresDatabase = "database"
-	parameterPostgresUser     = "username"
-	parameterPostgresPassword = "password"
-	parameterTargetDir        = "targetdir"
-	parameterWait             = "wait"
-	parameterOneTime          = "one-time"
-	parameterLock             = "lock"
-	parameterName             = "name"
+	defaultLockName        = "/var/run/mysql_backup_cron.lock"
+	defaultName            = "mysql"
+	parameterMysqlHost     = "host"
+	parameterMysqlPort     = "port"
+	parameterMysqlDatabase = "database"
+	parameterMysqlUser     = "username"
+	parameterMysqlPassword = "password"
+	parameterTargetDir     = "targetdir"
+	parameterWait          = "wait"
+	parameterOneTime       = "one-time"
+	parameterLock          = "lock"
+	parameterName          = "name"
 )
 
 var (
-	hostPtr      = flag.String(parameterPostgresHost, "", "host")
-	portPtr      = flag.Int(parameterPostgresPort, 5432, "port")
-	databasePtr  = flag.String(parameterPostgresDatabase, "", "database")
-	userPtr      = flag.String(parameterPostgresUser, "", "username")
-	passwordPtr  = flag.String(parameterPostgresPassword, "", "password")
+	hostPtr      = flag.String(parameterMysqlHost, "", "host")
+	portPtr      = flag.Int(parameterMysqlPort, 5432, "port")
+	databasePtr  = flag.String(parameterMysqlDatabase, "", "database")
+	userPtr      = flag.String(parameterMysqlUser, "", "username")
+	passwordPtr  = flag.String(parameterMysqlPassword, "", "password")
 	waitPtr      = flag.Duration(parameterWait, time.Minute*60, "wait")
 	oneTimePtr   = flag.Bool(parameterOneTime, false, "exit after first backup")
 	targetDirPtr = flag.String(parameterTargetDir, "", "target directory")
@@ -66,32 +66,32 @@ func do() error {
 		}
 	}()
 
-	glog.V(1).Info("backup postgres cron started")
-	defer glog.V(1).Info("backup postgres cron finished")
+	glog.V(1).Info("backup mysql cron started")
+	defer glog.V(1).Info("backup mysql cron finished")
 
 	return exec()
 }
 
 func exec() error {
-	host := model.PostgresqlHost(*hostPtr)
+	host := model.MysqlHost(*hostPtr)
 	if len(host) == 0 {
-		return fmt.Errorf("parameter %s missing", parameterPostgresHost)
+		return fmt.Errorf("parameter %s missing", parameterMysqlHost)
 	}
-	port := model.PostgresqlPort(*portPtr)
+	port := model.MysqlPort(*portPtr)
 	if port <= 0 {
-		return fmt.Errorf("parameter %s missing", parameterPostgresPort)
+		return fmt.Errorf("parameter %s missing", parameterMysqlPort)
 	}
-	user := model.PostgresqlUser(*userPtr)
+	user := model.MysqlUser(*userPtr)
 	if len(user) == 0 {
-		return fmt.Errorf("parameter %s missing", parameterPostgresUser)
+		return fmt.Errorf("parameter %s missing", parameterMysqlUser)
 	}
-	pass := model.PostgresqlPassword(*passwordPtr)
+	pass := model.MysqlPassword(*passwordPtr)
 	if len(pass) == 0 {
-		return fmt.Errorf("parameter %s missing", parameterPostgresPassword)
+		return fmt.Errorf("parameter %s missing", parameterMysqlPassword)
 	}
-	database := model.PostgresqlDatabase(*databasePtr)
+	database := model.MysqlDatabase(*databasePtr)
 	if len(database) == 0 {
-		return fmt.Errorf("parameter %s missing", parameterPostgresDatabase)
+		return fmt.Errorf("parameter %s missing", parameterMysqlDatabase)
 	}
 	targetDir := model.TargetDirectory(*targetDirPtr)
 	if len(targetDir) == 0 {

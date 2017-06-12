@@ -18,8 +18,8 @@ set -e
 case "$1" in
 
   configure)
-    chown -R root:root /opt/postgres_backup_cron
-    find /opt/postgres_backup_cron -type d -exec chmod 755 "{}" \;
+    chown -R root:root /opt/mysql_backup_cron
+    find /opt/mysql_backup_cron -type d -exec chmod 755 "{}" \;
     exit 0
   ;;
 

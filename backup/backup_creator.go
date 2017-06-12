@@ -10,21 +10,21 @@ import (
 	"io/ioutil"
 
 	"github.com/bborbe/io/util"
-	"github.com/bborbe/postgres_backup_cron/model"
+	"github.com/bborbe/mysql_backup_cron/model"
 	"github.com/golang/glog"
 )
 
 // Create backup
 func Create(
-name model.Name,
-host model.PostgresqlHost,
-port model.PostgresqlPort,
-user model.PostgresqlUser,
-pass model.PostgresqlPassword,
-database model.PostgresqlDatabase,
-targetDirectory model.TargetDirectory,
+	name model.Name,
+	host model.MysqlHost,
+	port model.MysqlPort,
+	user model.MysqlUser,
+	pass model.MysqlPassword,
+	database model.MysqlDatabase,
+	targetDirectory model.TargetDirectory,
 ) error {
-	//pg_dump -Z 9 -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -F c -b -v -f ${BACKUP_NAME} ${POSTGRES_DB}
+	//pg_dump -Z 9 -h ${MYSQL_HOST} -p ${MYSQL_PORT} -U ${MYSQL_USER} -F c -b -v -f ${BACKUP_NAME} ${MYSQL_DB}
 	backupfile := model.BuildBackupfileName(name, targetDirectory, database, time.Now())
 
 	if backupfile.Exists() {
@@ -48,7 +48,7 @@ targetDirectory model.TargetDirectory,
 	return nil
 }
 
-func writePasswordFile(host model.PostgresqlHost, port model.PostgresqlPort, user model.PostgresqlUser, pass model.PostgresqlPassword) error {
+func writePasswordFile(host model.MysqlHost, port model.MysqlPort, user model.MysqlUser, pass model.MysqlPassword) error {
 	content := fmt.Sprintf("%s:%d:*:%s:%s\n", host, port, user, pass)
 	path, err := util.NormalizePath("~/.pgpass")
 	if err != nil {

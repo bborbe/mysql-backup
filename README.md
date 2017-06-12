@@ -1,52 +1,52 @@
-# Postgres Backup Cron
+# Mysql Backup Cron
 
 ## Install
 
-`go get github.com/bborbe/postgres_backup_cron/bin/postgres_backup_cron`
+`go get github.com/bborbe/mysql_backup_cron/bin/mysql_backup_cron`
 
 ## Run Backup
 
 One time
 
 ```
-postgres_backup_cron \
+mysql_backup_cron \
 -logtostderr \
 -v=2 \
 -host=localhost \
 -port=5432 \
 -lock=/tmp/lock \ 
--username=postgres \
+-username=mysql \
 -password=S3CR3T \
 -database=db \
 -targetdir=/backup \
--name=postgres \
+-name=mysql \
 -one-time
 ```
 
 Cron
 
 ```
-postgres_backup_cron \
+mysql_backup_cron \
 -logtostderr \
 -v=2 \
 -host=localhost \
 -port=5432 \
 -lock=/tmp/lock \ 
--username=postgres \
+-username=mysql \
 -password=S3CR3T \
 -database=db \
 -targetdir=/backup \
--name=postgres \
+-name=mysql \
 -wait=1h
 ```
 
 ## Continuous integration
 
-[Jenkins](https://jenkins.benjamin-borbe.de/job/Go-Postgres-Backup-Cron/)
+[Jenkins](https://jenkins.benjamin-borbe.de/job/Go-Mysql-Backup-Cron/)
 
 ## Copyright and license
 
-    Copyright (c) 2016, Benjamin Borbe <bborbe@rocketnews.de>
+    Copyright (c) 2017, Benjamin Borbe <bborbe@rocketnews.de>
     All rights reserved.
     
     Redistribution and use in source and binary forms, with or without

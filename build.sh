@@ -1,8 +1,8 @@
 #!/bin/sh
 
-SOURCEDIRECTORY="github.com/bborbe/postgres_backup_cron"
+SOURCEDIRECTORY="github.com/bborbe/mysql_backup_cron"
 VERSION="1.0.1-b${BUILD_NUMBER}"
-NAME="postgres-backup-cron"
+NAME="mysql-backup-cron"
 
 ################################################################################
 

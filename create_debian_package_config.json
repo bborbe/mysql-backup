@@ -1,15 +1,15 @@
 {
-  "name": "postgres-backup-cron",
+  "name": "mysql-backup-cron",
   "section": "utils",
   "priority": "optional",
   "architecture": "amd64",
   "maintainer": "Benjamin Borbe <bborbe@rocketnews.de>",
-  "description": "Postgres Backup Cron",
-  "postinst": "src/github.com/bborbe/postgres_backup_cron/postinst",
+  "description": "Mysql Backup Cron",
+  "postinst": "src/github.com/bborbe/mysql_backup_cron/postinst",
   "files": [
     {
-      "source": "bin/postgres_backup_cron",
-      "target": "/opt/postgres_backup_cron/bin/postgres_backup_cron"
+      "source": "bin/mysql_backup_cron",
+      "target": "/opt/mysql_backup_cron/bin/mysql_backup_cron"
     }
   ]
 }

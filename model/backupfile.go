@@ -10,7 +10,7 @@ import (
 
 type BackupFilename string
 
-func BuildBackupfileName(name Name, targetDirectory TargetDirectory, database PostgresqlDatabase, date time.Time) BackupFilename {
+func BuildBackupfileName(name Name, targetDirectory TargetDirectory, database MysqlDatabase, date time.Time) BackupFilename {
 	return BackupFilename(fmt.Sprintf("%s/%s_%s_%s.dump", targetDirectory, name, database, date.Format("2006-01-02")))
 }
 

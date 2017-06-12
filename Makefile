@@ -1,6 +1,6 @@
 all: test install run
 install:
-	GOBIN=$(GOPATH)/bin GO15VENDOREXPERIMENT=1 go install bin/postgres_backup_cron/*.go
+	GOBIN=$(GOPATH)/bin GO15VENDOREXPERIMENT=1 go install bin/mysql_backup_cron/*.go
 test:
 	GO15VENDOREXPERIMENT=1 go test -cover `glide novendor`
 vet:
@@ -12,17 +12,17 @@ errcheck:
 	errcheck -ignore '(Close|Write)' ./...
 check: lint vet errcheck
 run:
-	postgres_backup_cron \
+	mysql_backup_cron \
 	-logtostderr \
 	-v=2 \
 	-host=localhost \
 	-port=5432 \
 	-lock=/tmp/lock \
-	-username=postgres \
+	-username=mysql \
 	-password=S3CR3T \
 	-database=db \
 	-targetdir=/tmp \
-	-name=postgres \
+	-name=mysql \
 	-one-time
 format:
 	find . -name "*.go" -exec gofmt -w "{}" \;
