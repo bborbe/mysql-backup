@@ -2,16 +2,14 @@ package backup
 
 import (
 	"fmt"
+	"github.com/bborbe/io/util"
+	"github.com/bborbe/mysql_backup_cron/model"
+	"github.com/golang/glog"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
-
-	"io/ioutil"
-
-	"github.com/bborbe/io/util"
-	"github.com/bborbe/mysql_backup_cron/model"
-	"github.com/golang/glog"
 )
 
 // Create backup
@@ -24,36 +22,33 @@ func Create(
 	database model.MysqlDatabase,
 	targetDirectory model.TargetDirectory,
 ) error {
-	//pg_dump -Z 9 -h ${MYSQL_HOST} -p ${MYSQL_PORT} -U ${MYSQL_USER} -F c -b -v -f ${BACKUP_NAME} ${MYSQL_DB}
+	// mysqldump --lock-tables=false -u [USER] -h [HOSTNAME] -p [DATABASENAME]
 	backupfile := model.BuildBackupfileName(name, targetDirectory, database, time.Now())
-
 	if backupfile.Exists() {
 		glog.V(1).Infof("backup %s already exists => skip", backupfile)
 		return nil
 	}
-
-	if err := writePasswordFile(host, port, user, pass); err != nil {
+	path, err := util.NormalizePath("~/.my.cnf")
+	if err != nil {
 		return err
 	}
-
-	glog.V(1).Infof("pg_dump started")
-	if err := runCommand("pg_dump", targetDirectory, "-Z", "9", "-h", host.String(), "-p", port.String(), "-U", user.String(), "-F", "c", "-b", "-v", "-f", backupfile.String(), database.String()); err != nil {
-		glog.V(2).Infof("pg_dump failed, delete incomplete backup: %v", err)
+	if err := writePasswordFile(path, user, pass); err != nil {
+		return err
+	}
+	glog.V(1).Infof("mysqldump started")
+	if err := runCommand("mysqldump", targetDirectory, "--defaults-file="+path, "--lock-tables=false", "--user", user.String(), "--host", host.String(), "--port", port.String(), "--result-file", backupfile.String(), database.String()); err != nil {
+		glog.V(2).Infof("mysqldump failed, delete incomplete backup: %v", err)
 		if err := backupfile.Delete(); err != nil {
 			glog.Warningf("delete incomplete backup failed: %v", err)
 		}
 		return err
 	}
-	glog.V(1).Infof("pg_dump finshed")
+	glog.V(1).Infof("mysqldump finshed")
 	return nil
 }
 
-func writePasswordFile(host model.MysqlHost, port model.MysqlPort, user model.MysqlUser, pass model.MysqlPassword) error {
-	content := fmt.Sprintf("%s:%d:*:%s:%s\n", host, port, user, pass)
-	path, err := util.NormalizePath("~/.pgpass")
-	if err != nil {
-		return err
-	}
+func writePasswordFile(path string, user model.MysqlUser, pass model.MysqlPassword) error {
+	content := fmt.Sprintf("[mysqldump]\nuser=%s\npassword=%s\n\n[mysql]\nuser=%s\npassword=%s\n", user.String(), pass.String(), user.String(), pass.String())
 	return ioutil.WriteFile(path, []byte(content), 0600)
 }
 

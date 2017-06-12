@@ -18,9 +18,9 @@ run:
 	-host=localhost \
 	-port=5432 \
 	-lock=/tmp/lock \
-	-username=mysql \
+	-username=testuser \
 	-password=S3CR3T \
-	-database=db \
+	-database=testdatabase \
 	-targetdir=/tmp \
 	-name=mysql \
 	-one-time
