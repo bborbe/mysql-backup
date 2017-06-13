@@ -112,10 +112,14 @@ func exec() error {
 		return backup.Create(name, host, port, user, pass, database, targetDir)
 	}
 
-	cron := cron.New(
-		oneTime,
-		wait,
-		action,
-	)
-	return cron.Run(context.Background())
+	var c cron.Cron
+	if *oneTimePtr {
+		c = cron.NewOneTimeCron(action)
+	} else {
+		c = cron.NewWaitCron(
+			*waitPtr,
+			action,
+		)
+	}
+	return c.Run(context.Background())
 }
