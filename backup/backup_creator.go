@@ -2,14 +2,15 @@ package backup
 
 import (
 	"fmt"
-	"github.com/bborbe/io/util"
-	"github.com/bborbe/mysql_backup_cron/model"
-	"github.com/golang/glog"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/bborbe/io/util"
+	"github.com/bborbe/mysql_backup_cron/model"
+	"github.com/golang/glog"
 )
 
 // Create backup
