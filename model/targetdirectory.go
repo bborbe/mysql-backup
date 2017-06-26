@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"github.com/bborbe/io/util"
 	"os"
+
+	"github.com/bborbe/io/util"
 )
 
 type TargetDirectory string
