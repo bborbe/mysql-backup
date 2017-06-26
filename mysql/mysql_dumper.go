@@ -64,6 +64,9 @@ func (m *Dumper) Validate() error {
 }
 
 func (m *Dumper) Run(ctx context.Context) error {
+	if err := m.TargetDirectory.Mkdir(0700); err != nil {
+		return fmt.Errorf("create targetdirectory %v failed: %v", m.TargetDirectory, err)
+	}
 	return backup.Create(
 		m.Name,
 		m.Host,
