@@ -10,6 +10,7 @@ import (
 
 type Dumper struct {
 	Database        model.MysqlDatabase
+	AllDatabases    bool
 	Host            model.MysqlHost
 	Port            model.MysqlPort
 	User            model.MysqlUser
@@ -20,6 +21,7 @@ type Dumper struct {
 
 func NewDumper(
 	database model.MysqlDatabase,
+	allDatabases bool,
 	host model.MysqlHost,
 	port model.MysqlPort,
 	user model.MysqlUser,
@@ -35,6 +37,7 @@ func NewDumper(
 	d.Password = password
 	d.Name = name
 	d.TargetDirectory = targetDirectory
+	d.AllDatabases = allDatabases
 	return d
 }
 
@@ -57,8 +60,11 @@ func (m *Dumper) Validate() error {
 	if len(m.TargetDirectory) == 0 {
 		return fmt.Errorf("mysql target dir missing")
 	}
-	if len(m.Name) == 0 {
+	if m.AllDatabases == false && len(m.Name) == 0 {
 		return fmt.Errorf("mysql name missing")
+	}
+	if m.AllDatabases == true && len(m.Name) > 0 {
+		return fmt.Errorf("mysql name is not allowed with all enabled")
 	}
 	return nil
 }
@@ -67,13 +73,13 @@ func (m *Dumper) Run(ctx context.Context) error {
 	if err := m.TargetDirectory.Mkdir(0700); err != nil {
 		return fmt.Errorf("create targetdirectory %v failed: %v", m.TargetDirectory, err)
 	}
-	return backup.Create(
+	dumper := backup.NewDumper(
 		m.Name,
 		m.Host,
 		m.Port,
 		m.User,
 		m.Password,
-		m.Database,
 		m.TargetDirectory,
 	)
+	return dumper.Database(m.Database)
 }

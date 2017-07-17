@@ -13,18 +13,45 @@ import (
 	"github.com/golang/glog"
 )
 
-// Create backup
-func Create(
+type backup struct {
+	name            model.Name
+	host            model.MysqlHost
+	port            model.MysqlPort
+	user            model.MysqlUser
+	pass            model.MysqlPassword
+	targetDirectory model.TargetDirectory
+}
+
+func NewDumper(
 	name model.Name,
 	host model.MysqlHost,
 	port model.MysqlPort,
 	user model.MysqlUser,
 	pass model.MysqlPassword,
-	database model.MysqlDatabase,
 	targetDirectory model.TargetDirectory,
+) *backup {
+	b := new(backup)
+	b.name = name
+	b.host = host
+	b.port = port
+	b.user = user
+	b.pass = pass
+	b.targetDirectory = targetDirectory
+	return b
+}
+
+func (b *backup) Database(
+	database model.MysqlDatabase,
 ) error {
-	// mysqldump --lock-tables=false -u [USER] -h [HOSTNAME] -p [DATABASENAME]
-	backupfile := model.BuildBackupfileName(name, targetDirectory, database, time.Now())
+	return b.backup(database.String(), database.String())
+}
+
+func (b *backup) All() error {
+	return b.backup("all", "--all-databases")
+}
+
+func (b *backup) backup(name string, database string) error {
+	backupfile := model.BuildBackupfileName(b.name, b.targetDirectory, "all", time.Now())
 	if backupfile.Exists() {
 		glog.V(1).Infof("backup %s already exists => skip", backupfile)
 		return nil
@@ -33,11 +60,11 @@ func Create(
 	if err != nil {
 		return err
 	}
-	if err := writePasswordFile(path, user, pass); err != nil {
+	if err := writePasswordFile(path, b.user, b.pass); err != nil {
 		return err
 	}
 	glog.V(1).Infof("mysqldump started")
-	if err := runCommand("mysqldump", targetDirectory, "--defaults-file="+path, "--lock-tables=false", "--user", user.String(), "--host", host.String(), "--port", port.String(), "--result-file", backupfile.String(), database.String()); err != nil {
+	if err := runCommand("mysqldump", b.targetDirectory, "--defaults-file="+path, "--lock-tables=false", "--user", b.user.String(), "--host", b.host.String(), "--port", b.port.String(), "--result-file", backupfile.String(), "--all-databases"); err != nil {
 		glog.V(2).Infof("mysqldump failed, delete incomplete backup: %v", err)
 		if err := backupfile.Delete(); err != nil {
 			glog.Warningf("delete incomplete backup failed: %v", err)

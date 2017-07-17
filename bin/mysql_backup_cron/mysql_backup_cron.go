@@ -76,6 +76,7 @@ func exec() error {
 
 	mysqlDumper := mysql.NewDumper(
 		model.MysqlDatabase(*mysqlDatabasePtr),
+		false,
 		model.MysqlHost(*mysqlHostPtr),
 		model.MysqlPort(*mysqlPortPtr),
 		model.MysqlUser(*mysqlUserPtr),

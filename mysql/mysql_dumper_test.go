@@ -17,6 +17,7 @@ func TestMain(m *testing.M) {
 func createDumper() *Dumper {
 	return NewDumper(
 		"database",
+		false,
 		"localhost",
 		3306,
 		"user",
