@@ -54,17 +54,17 @@ func (m *Dumper) Validate() error {
 	if len(m.Password) == 0 {
 		return fmt.Errorf("mysql password missing")
 	}
-	if len(m.Database) == 0 {
-		return fmt.Errorf("mysql database missing")
+	if len(m.Name) == 0 {
+		return fmt.Errorf("mysql name missing")
 	}
 	if len(m.TargetDirectory) == 0 {
 		return fmt.Errorf("mysql target dir missing")
 	}
-	if m.AllDatabases == false && len(m.Name) == 0 {
-		return fmt.Errorf("mysql name missing")
+	if m.AllDatabases == false && len(m.Database) == 0 {
+		return fmt.Errorf("mysql database missing")
 	}
-	if m.AllDatabases == true && len(m.Name) > 0 {
-		return fmt.Errorf("mysql name is not allowed with all enabled")
+	if m.AllDatabases == true && len(m.Database) > 0 {
+		return fmt.Errorf("mysql database is not allowed with all enabled")
 	}
 	return nil
 }
@@ -81,5 +81,8 @@ func (m *Dumper) Run(ctx context.Context) error {
 		m.Password,
 		m.TargetDirectory,
 	)
+	if m.AllDatabases {
+		return dumper.All()
+	}
 	return dumper.Database(m.Database)
 }
