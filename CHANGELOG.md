@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.3
+
+- Remove parameter
+
 ## 1.2.2
 
 - Remove connect_timeout and wait_timeout

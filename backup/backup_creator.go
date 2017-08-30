@@ -78,12 +78,10 @@ func (b *backup) backup(name string, database string) error {
 }
 
 const myCnfTemplaate = `
-[client]
+[mysqldump]
 user={{.User}}
 password={{.Pass}}
 max_allowed_packet=1G
-net_read_timeout=600
-net_write_timeout=600
 `
 
 func writeMyCnfFile(path string, user model.MysqlUser, pass model.MysqlPassword) error {

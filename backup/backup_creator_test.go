@@ -22,12 +22,10 @@ func TestRunCommand(t *testing.T) {
 }
 
 var expectedContent = `
-[client]
+[mysqldump]
 user=myuser
 password=mypass
 max_allowed_packet=1G
-net_read_timeout=600
-net_write_timeout=600
 `
 
 func TestWriteMyCnfFile(t *testing.T) {
