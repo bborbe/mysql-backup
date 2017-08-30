@@ -8,9 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"bytes"
 	"github.com/bborbe/io/util"
 	"github.com/bborbe/mysql_backup_cron/model"
 	"github.com/golang/glog"
+	"text/template"
 )
 
 type backup struct {
@@ -60,7 +62,7 @@ func (b *backup) backup(name string, database string) error {
 	if err != nil {
 		return err
 	}
-	if err := writePasswordFile(path, b.user, b.pass); err != nil {
+	if err := writeMyCnfFile(path, b.user, b.pass); err != nil {
 		return err
 	}
 	glog.V(1).Infof("mysqldump started")
@@ -75,9 +77,26 @@ func (b *backup) backup(name string, database string) error {
 	return nil
 }
 
-func writePasswordFile(path string, user model.MysqlUser, pass model.MysqlPassword) error {
-	content := fmt.Sprintf("[mysqldump]\nuser=%s\npassword=%s\n\n[mysql]\nuser=%s\npassword=%s\n", user.String(), pass.String(), user.String(), pass.String())
-	return ioutil.WriteFile(path, []byte(content), 0600)
+const myCnfTemplaate = `
+[client]
+user={{.User}}
+password={{.Pass}}
+max_allowed_packet=1G
+interactive_timeout=600
+wait_timeout=600
+net_read_timeout=600
+net_write_timeout=600
+connect_timeout=600
+`
+
+func writeMyCnfFile(path string, user model.MysqlUser, pass model.MysqlPassword) error {
+	var data struct {
+		User model.MysqlUser
+		Pass model.MysqlPassword
+	}
+	data.Pass = pass
+	data.User = user
+	return writeTemplate(path, myCnfTemplaate, data, false)
 }
 
 func runCommand(command string, cwd model.TargetDirectory, args ...string) error {
@@ -101,4 +120,34 @@ func runCommand(command string, cwd model.TargetDirectory, args ...string) error
 	}
 	glog.V(2).Infof("%s finished", command)
 	return nil
+}
+
+func writeTemplate(path string, templateContent string, data interface{}, executable bool) error {
+	content, err := generateTemplate(path, templateContent, data)
+	if err != nil {
+		return err
+	}
+	return writeFile(path, content, executable)
+}
+
+func generateTemplate(name string, templateContent string, data interface{}) ([]byte, error) {
+	tmpl, err := template.New(name).Parse(templateContent)
+	if err != nil {
+		return nil, err
+	}
+	content := bytes.NewBufferString("")
+	if err := tmpl.Execute(content, data); err != nil {
+		return nil, err
+	}
+	return content.Bytes(), nil
+}
+
+func writeFile(path string, content []byte, executable bool) error {
+	var perm os.FileMode
+	if executable {
+		perm = 0755
+	} else {
+		perm = 0644
+	}
+	return ioutil.WriteFile(path, content, perm)
 }
