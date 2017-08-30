@@ -82,10 +82,8 @@ const myCnfTemplaate = `
 user={{.User}}
 password={{.Pass}}
 max_allowed_packet=1G
-wait_timeout=600
 net_read_timeout=600
 net_write_timeout=600
-connect_timeout=600
 `
 
 func writeMyCnfFile(path string, user model.MysqlUser, pass model.MysqlPassword) error {

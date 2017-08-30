@@ -26,11 +26,8 @@ var expectedContent = `
 user=myuser
 password=mypass
 max_allowed_packet=1G
-interactive_timeout=600
-wait_timeout=600
 net_read_timeout=600
 net_write_timeout=600
-connect_timeout=600
 `
 
 func TestWriteMyCnfFile(t *testing.T) {
