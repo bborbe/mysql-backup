@@ -17,9 +17,16 @@ func TestMain(m *testing.M) {
 	os.Exit(exit)
 }
 
-func TestBuildBackupfileName(t *testing.T) {
-	filename := BuildBackupfileName("myname", "/tmp", "mydb", time.Unix(1313123123, 0))
+func TestBuildBackupfileNameDate(t *testing.T) {
+	filename := BuildBackupfileNameWithDate("myname", "/tmp", "mydb", time.Unix(1313123123, 0))
 	if err := AssertThat(filename.String(), Is("/tmp/myname_mydb_2011-08-12.dump")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBuildBackupfileName(t *testing.T) {
+	filename := BuildBackupfileName("myname", "/tmp", "mydb")
+	if err := AssertThat(filename.String(), Is("/tmp/myname_mydb.dump")); err != nil {
 		t.Fatal(err)
 	}
 }

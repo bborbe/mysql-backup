@@ -1,4 +1,4 @@
-package mysql
+package backup
 
 import (
 	"os"
@@ -14,8 +14,8 @@ func TestMain(m *testing.M) {
 	os.Exit(exit)
 }
 
-func createDumper() *Dumper {
-	return NewDumper(
+func createDumper() *Backuper {
+	return New(
 		"database",
 		false,
 		"localhost",
@@ -24,10 +24,12 @@ func createDumper() *Dumper {
 		"password",
 		"name",
 		"/backup",
+		true,
+		false,
 	)
 }
-func createDumperAll() *Dumper {
-	return NewDumper(
+func createDumperAll() *Backuper {
+	return New(
 		"",
 		true,
 		"localhost",
@@ -36,6 +38,8 @@ func createDumperAll() *Dumper {
 		"password",
 		"name",
 		"/backup",
+		true,
+		false,
 	)
 }
 

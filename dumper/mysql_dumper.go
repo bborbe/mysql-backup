@@ -1,18 +1,17 @@
-package backup
+package dumper
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-	"time"
+	"text/template"
 
-	"bytes"
 	"github.com/bborbe/io/util"
 	"github.com/bborbe/mysql_backup_cron/model"
 	"github.com/golang/glog"
-	"text/template"
 )
 
 type backup struct {
@@ -24,7 +23,7 @@ type backup struct {
 	targetDirectory model.TargetDirectory
 }
 
-func NewDumper(
+func New(
 	name model.Name,
 	host model.MysqlHost,
 	port model.MysqlPort,
@@ -44,20 +43,26 @@ func NewDumper(
 
 func (b *backup) Database(
 	database model.MysqlDatabase,
+	backupfile model.BackupFilename,
 ) error {
-	return b.backup(database.String(), database.String())
+	return b.backup(database.String(), database.String(), backupfile)
 }
 
-func (b *backup) All() error {
-	return b.backup("all", "--all-databases")
+func (b *backup) All(
+	backupfile model.BackupFilename,
+) error {
+	return b.backup(
+		"all",
+		"--all-databases",
+		backupfile,
+	)
 }
 
-func (b *backup) backup(name string, database string) error {
-	backupfile := model.BuildBackupfileName(b.name, b.targetDirectory, "all", time.Now())
-	if backupfile.Exists() {
-		glog.V(1).Infof("backup %s already exists => skip", backupfile)
-		return nil
-	}
+func (b *backup) backup(
+	name string,
+	database string,
+	backupfile model.BackupFilename,
+) error {
 	path, err := util.NormalizePath("~/.my.cnf")
 	if err != nil {
 		return err

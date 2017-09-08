@@ -10,8 +10,12 @@ import (
 
 type BackupFilename string
 
-func BuildBackupfileName(name Name, targetDirectory TargetDirectory, database MysqlDatabase, date time.Time) BackupFilename {
+func BuildBackupfileNameWithDate(name Name, targetDirectory TargetDirectory, database MysqlDatabase, date time.Time) BackupFilename {
 	return BackupFilename(fmt.Sprintf("%s/%s_%s_%s.dump", targetDirectory, name, database, date.Format("2006-01-02")))
+}
+
+func BuildBackupfileName(name Name, targetDirectory TargetDirectory, database MysqlDatabase) BackupFilename {
+	return BackupFilename(fmt.Sprintf("%s/%s_%s.dump", targetDirectory, name, database))
 }
 
 func (b BackupFilename) Delete() error {

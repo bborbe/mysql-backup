@@ -9,8 +9,8 @@ import (
 	"github.com/bborbe/cron"
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
+	"github.com/bborbe/mysql_backup_cron/backup"
 	"github.com/bborbe/mysql_backup_cron/model"
-	"github.com/bborbe/mysql_backup_cron/mysql"
 	"github.com/golang/glog"
 )
 
@@ -74,7 +74,7 @@ func exec() error {
 	oneTime := *oneTimePtr
 	wait := *waitPtr
 
-	mysqlDumper := mysql.NewDumper(
+	mysqlDumper := backup.New(
 		model.MysqlDatabase(*mysqlDatabasePtr),
 		false,
 		model.MysqlHost(*mysqlHostPtr),
@@ -83,9 +83,11 @@ func exec() error {
 		model.MysqlPassword(*mysqlPasswordPtr),
 		model.Name(*namePtr),
 		model.TargetDirectory(*targetDirPtr),
+		true,
+		false,
 	)
 
-	glog.V(1).Infof("name: %s, host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v, lockName: %s", mysqlDumper.Name, mysqlDumper.Host, mysqlDumper.Port, mysqlDumper.User, len(mysqlDumper.Password), mysqlDumper.Database, mysqlDumper.TargetDirectory, wait, oneTime)
+	glog.V(1).Infof("name: %s, host: %s, port: %d, user: %s, password-length: %d, database: %s, targetDir: %s, wait: %v, oneTime: %v", mysqlDumper.Name, mysqlDumper.Host, mysqlDumper.Port, mysqlDumper.User, len(mysqlDumper.Password), mysqlDumper.Database, mysqlDumper.TargetDirectory, wait, oneTime)
 
 	if err := mysqlDumper.Validate(); err != nil {
 		return fmt.Errorf("validate mysql parameter failed: %v", err)

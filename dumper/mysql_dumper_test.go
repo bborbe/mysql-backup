@@ -1,11 +1,12 @@
-package backup
+package dumper
 
 import (
-	. "github.com/bborbe/assert"
-	"github.com/golang/glog"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	. "github.com/bborbe/assert"
+	"github.com/golang/glog"
 )
 
 func TestMain(m *testing.M) {
