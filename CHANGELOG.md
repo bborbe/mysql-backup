@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.3.1
+
+- fix check if existing backup should be overwritten
+
 ## 1.3.0
 
 - allow filename without date 
