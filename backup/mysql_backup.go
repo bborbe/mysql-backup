@@ -77,12 +77,16 @@ func (b *Backuper) Validate() error {
 	return nil
 }
 
+func (b *Backuper) checkBackupShouldBeSkipped(backupFile model.BackupFilename) bool {
+	return !b.OverwriteBackup && backupFile.Exists()
+}
+
 func (b *Backuper) Run(ctx context.Context) error {
 	if err := b.TargetDirectory.Mkdir(0700); err != nil {
 		return fmt.Errorf("create targetdirectory %v failed: %v", b.TargetDirectory, err)
 	}
 	backupFile := b.backupFile()
-	if b.OverwriteBackup && backupFile.Exists() {
+	if b.checkBackupShouldBeSkipped(backupFile) {
 		glog.V(1).Infof("backup %s already exists => skip", backupFile)
 		return nil
 	}

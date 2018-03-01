@@ -1,10 +1,12 @@
 package backup
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 
 	. "github.com/bborbe/assert"
+	"github.com/bborbe/mysql_backup_cron/model"
 	"github.com/golang/glog"
 )
 
@@ -14,7 +16,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exit)
 }
 
-func createDumper() *Backuper {
+func createBackuper() *Backuper {
 	return New(
 		"database",
 		false,
@@ -28,7 +30,7 @@ func createDumper() *Backuper {
 		false,
 	)
 }
-func createDumperAll() *Backuper {
+func createBackupAll() *Backuper {
 	return New(
 		"",
 		true,
@@ -44,109 +46,109 @@ func createDumperAll() *Backuper {
 }
 
 func TestCreateDumper(t *testing.T) {
-	mysqlDumper := createDumper()
-	if err := AssertThat(mysqlDumper.Database.String(), Is("database")); err != nil {
+	b := createBackuper()
+	if err := AssertThat(b.Database.String(), Is("database")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.AllDatabases, Is(false)); err != nil {
+	if err := AssertThat(b.AllDatabases, Is(false)); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Host.String(), Is("localhost")); err != nil {
+	if err := AssertThat(b.Host.String(), Is("localhost")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Port.Int(), Is(3306)); err != nil {
+	if err := AssertThat(b.Port.Int(), Is(3306)); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.User.String(), Is("user")); err != nil {
+	if err := AssertThat(b.User.String(), Is("user")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Password.String(), Is("password")); err != nil {
+	if err := AssertThat(b.Password.String(), Is("password")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Name.String(), Is("name")); err != nil {
+	if err := AssertThat(b.Name.String(), Is("name")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.TargetDirectory.String(), Is("/backup")); err != nil {
+	if err := AssertThat(b.TargetDirectory.String(), Is("/backup")); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCreateDumperAll(t *testing.T) {
-	mysqlDumper := createDumperAll()
-	if err := AssertThat(mysqlDumper.Database.String(), Is("")); err != nil {
+	b := createBackupAll()
+	if err := AssertThat(b.Database.String(), Is("")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.AllDatabases, Is(true)); err != nil {
+	if err := AssertThat(b.AllDatabases, Is(true)); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Host.String(), Is("localhost")); err != nil {
+	if err := AssertThat(b.Host.String(), Is("localhost")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Port.Int(), Is(3306)); err != nil {
+	if err := AssertThat(b.Port.Int(), Is(3306)); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.User.String(), Is("user")); err != nil {
+	if err := AssertThat(b.User.String(), Is("user")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Password.String(), Is("password")); err != nil {
+	if err := AssertThat(b.Password.String(), Is("password")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.Name.String(), Is("name")); err != nil {
+	if err := AssertThat(b.Name.String(), Is("name")); err != nil {
 		t.Fatal(err)
 	}
-	if err := AssertThat(mysqlDumper.TargetDirectory.String(), Is("/backup")); err != nil {
+	if err := AssertThat(b.TargetDirectory.String(), Is("/backup")); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateSuccess(t *testing.T) {
-	mysqlDumper := createDumper()
-	if err := AssertThat(mysqlDumper.Validate(), NilValue()); err != nil {
+	b := createBackuper()
+	if err := AssertThat(b.Validate(), NilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateSuccessAll(t *testing.T) {
-	mysqlDumper := createDumperAll()
-	if err := AssertThat(mysqlDumper.Validate(), NilValue()); err != nil {
+	b := createBackupAll()
+	if err := AssertThat(b.Validate(), NilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateReturnErrorIfDatabaseIsEmptyAndAllDatabasesActiv(t *testing.T) {
-	mysqlDumper := createDumperAll()
-	mysqlDumper.Database = "mydb"
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackupAll()
+	b.Database = "mydb"
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfDatabaseIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.Database = ""
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.Database = ""
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfHostIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.Host = ""
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.Host = ""
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfPortIsZero(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.Port = 0
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.Port = 0
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfUserIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
+	mysqlDumper := createBackuper()
 	mysqlDumper.User = ""
 	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
@@ -154,25 +156,66 @@ func TestValidateFailsIfUserIsEmpty(t *testing.T) {
 }
 
 func TestValidateFailsIfPasswordIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.Password = ""
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.Password = ""
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfNameIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.Name = ""
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.Name = ""
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestValidateFailsIfTargetDirectoryIsEmpty(t *testing.T) {
-	mysqlDumper := createDumper()
-	mysqlDumper.TargetDirectory = ""
-	if err := AssertThat(mysqlDumper.Validate(), NotNilValue()); err != nil {
+	b := createBackuper()
+	b.TargetDirectory = ""
+	if err := AssertThat(b.Validate(), NotNilValue()); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckBackupShouldBeSkippedReturnAlwaysFalseIfOverwriteTrue(t *testing.T) {
+	b := createBackuper()
+	b.OverwriteBackup = true
+	result := b.checkBackupShouldBeSkipped(model.BackupFilename("/tmp/backup"))
+	if err := AssertThat(result, Is(false)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckBackupShouldBeSkippedReturnFalseIfFileNotExists(t *testing.T) {
+	b := createBackuper()
+	b.OverwriteBackup = false
+	file, err := ioutil.TempFile("", "backupfile_not_exists")
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	result := b.checkBackupShouldBeSkipped(model.BackupFilename(file.Name()))
+	if err := AssertThat(result, Is(false)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckBackupShouldBeSkippedReturnTrueIfFileExists(t *testing.T) {
+	b := createBackuper()
+	b.OverwriteBackup = false
+	file, err := ioutil.TempFile("", "backupfile_exists")
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	err = ioutil.WriteFile(file.Name(), []byte("backupcontent"), 0755)
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	result := b.checkBackupShouldBeSkipped(model.BackupFilename("/tmp"))
+	if err := AssertThat(result, Is(true)); err != nil {
 		t.Fatal(err)
 	}
 }
