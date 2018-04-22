@@ -1,0 +1,24 @@
+FROM mysql:5.7
+MAINTAINER Benjamin Borbe <bborbe@rocketnews.de>
+
+ENV LOGLEVEL info
+ENV HOST localhost
+ENV PORT 5432
+ENV DATABASE mysql
+ENV USERNAME mysql
+ENV PASSWORD S3CR3T
+ENV TARGETDIR /backup
+ENV WAIT 1h
+ENV ONE_TIME false
+ENV LOCK /var/run/mysql-backup.lock
+
+RUN set -x \
+	&& DEBIAN_FRONTEND=noninteractive apt-get update --quiet \
+	&& DEBIAN_FRONTEND=noninteractive apt-get upgrade --quiet --yes \
+	&& DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
+	&& DEBIAN_FRONTEND=noninteractive apt-get clean
+
+VOLUME ["/backup"]
+
+COPY mysql-backup /
+ENTRYPOINT ["/mysql-backup"]

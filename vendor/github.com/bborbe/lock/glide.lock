@@ -1,0 +1,8 @@
+hash: 346f67eb9e6914a6c5330da411edeed4cc95534869504ea3c60fef6124c6aa82
+updated: 2016-08-29T00:12:09.356353699+02:00
+imports:
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+testImports:
+- name: github.com/bborbe/assert
+  version: 639eac9a24e3c01472758f3c79452b8517bc29f6

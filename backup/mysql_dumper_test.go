@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/mysql_backup_cron/model"
+	"github.com/bborbe/mysql-backup/model"
 	"github.com/golang/glog"
 )
 

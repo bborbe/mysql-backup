@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.0
+
+- Add Jenkinsfile
+- Use deps instead glide
+- Move main to root
+
 ## 1.3.1
 
 - fix check if existing backup should be overwritten

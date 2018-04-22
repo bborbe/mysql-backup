@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bborbe/mysql_backup_cron/dumper"
-	"github.com/bborbe/mysql_backup_cron/model"
+	"github.com/bborbe/mysql-backup/dumper"
+	"github.com/bborbe/mysql-backup/model"
 	"github.com/golang/glog"
 )
 

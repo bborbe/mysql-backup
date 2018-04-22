@@ -1,0 +1,8 @@
+FROM golang:1.10
+MAINTAINER Benjamin Borbe <bborbe@rocketnews.de>
+ARG VERSION
+COPY Makefile /
+COPY . /go/src/github.com/bborbe/mysql-backup
+WORKDIR /
+RUN make buildgo
+CMD ["/bin/bash"]

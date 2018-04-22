@@ -9,8 +9,8 @@ import (
 	"github.com/bborbe/cron"
 	flag "github.com/bborbe/flagenv"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/mysql_backup_cron/backup"
-	"github.com/bborbe/mysql_backup_cron/model"
+	"github.com/bborbe/mysql-backup/backup"
+	"github.com/bborbe/mysql-backup/model"
 	"github.com/golang/glog"
 )
 
